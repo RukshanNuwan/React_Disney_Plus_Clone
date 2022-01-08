@@ -1,9 +1,10 @@
+import {useEffect} from "react";
 import styled from "styled-components";
-import {signInWithPopup} from 'firebase/auth';
+import {onAuthStateChanged, signInWithPopup, signOut} from 'firebase/auth';
 import {auth, provider} from "../firebase";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import {selectUserName, selectUserPhoto, setUserLoginDetails} from "../features/user/userSlice";
+import {selectUserName, selectUserPhoto, setSignOutState, setUserLoginDetails} from "../features/user/userSlice";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -11,14 +12,35 @@ const Header = () => {
   const userName = useSelector(selectUserName);
   const userPhoto = useSelector(selectUserPhoto);
 
+  // if the user logged in, then the user auto redirect to the home page
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+        navigate('/home');
+      }
+    });
+  }, [userName]);
+
   const handleAuth = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        setUser(result.user);
-      })
-      .catch((error) => {
-        console.error(error.message);
-      });
+    if (!userName) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          setUser(result.user);
+        })
+        .catch((error) => {
+          console.error(error.message);
+        });
+    } else if (userName) {
+      signOut(auth)
+        .then(() => {
+          dispatch(setSignOutState());
+          navigate('/');
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    }
   };
 
   const setUser = (user) => {
@@ -65,7 +87,12 @@ const Header = () => {
               <span>SERIES</span>
             </a>
           </NavMenu>
-          <UserImg src={userPhoto} alt={userName}/>
+          <SignOut>
+            <UserImg src={userPhoto} alt={userName}/>
+            <DropDown>
+              <span onClick={handleAuth}>Sign Out</span>
+            </DropDown>
+          </SignOut>
         </>
       )}
     </Nav>
@@ -182,8 +209,40 @@ const Login = styled.a`
   }
 `;
 
+const SignOut = styled.div`
+  position: relative;
+  height: 48px;
+  width: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 const UserImg = styled.img`
   height: 100%;
+  width: 100%;
+  border-radius: 50%;
+`;
+
+const DropDown = styled.div`
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 100px;
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-align: center;
+  background: #131313;
+  border: 1px solid rgba(151, 151, 151, 0.34);
+  border-radius: 4px;
+  opacity: 0;
+
+  &:hover {
+    opacity: 1;
+    cursor: pointer;
+    transition-duration: 1s;
+  }
 `;
 
 export default Header;
