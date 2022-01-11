@@ -3,7 +3,6 @@ import {getFirestore} from 'firebase/firestore';
 import {getAuth, GoogleAuthProvider} from 'firebase/auth';
 import {getStorage} from 'firebase/storage';
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyBYtqpPrFsTx5jGB31-l6zC5M6mG23O19M",
   authDomain: "disney-plus-clone-52151.firebaseapp.com",
