@@ -2,13 +2,16 @@ import {useEffect, useState} from "react";
 import styled from "styled-components";
 import {useParams} from "react-router-dom";
 import db from "../firebase";
+import {doc, getDoc} from 'firebase/firestore';
 
 const Detail = () => {
   const [detailData, setDetailData] = useState({});
   const {id} = useParams();
 
   useEffect(() => {
-    db.collection('movies').doc(id).get().then((doc) => {
+    const docRef = doc(db, 'movies', id);
+
+    getDoc(docRef).then((doc) => {
       if (doc.exists) {
         setDetailData(doc.data());
       } else {
@@ -80,7 +83,7 @@ const Background = styled.div`
 
   img {
     width: 100vw;
-    height: 200vh;
+    height: 100vh;
 
     @media (max-width: 768px) {
       width: initial;
