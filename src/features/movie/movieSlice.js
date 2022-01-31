@@ -20,7 +20,7 @@ const movieSlice = createSlice({
   }
 });
 
-export const {setMovie} = movieSlice.actions;
+export const {setMovies} = movieSlice.actions;
 
 export const selectRecommend = (state) => state.movie.recommend;
 export const selectNewDisney = (state) => state.movie.newDisney;

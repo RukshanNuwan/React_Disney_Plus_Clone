@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
 import styled from "styled-components";
 import ImgSlider from "./ImgSlider";
 import Viewers from "./Viewers";
@@ -7,61 +7,60 @@ import Recommends from "./Recommends";
 import NewDisney from "./NewDisney";
 import Originals from "./Originals";
 import Trending from "./Trending";
-import { selectUserName } from "../features/user/userSlice";
+import {selectUserName} from "../features/user/userSlice";
 import db from "../firebase";
-import { setMovie } from "../features/movie/movieSlice";
+import {setMovies} from "../features/movie/movieSlice";
+import {collection, onSnapshot} from 'firebase/firestore';
 
 const Home = () => {
   const dispatch = useDispatch();
   const userName = useSelector(selectUserName);
 
-  let recommends = [];
-  let newDisneys = [];
-  let originals = [];
-  let trendings = [];
-
   useEffect(() => {
-    // there is an error occurred. It sys db.collection is not a function
-    db.collection('movies').onSnapshot((snapshot) => {
-      snapshot.docs.map((doc) => {
-        console.log(recommends);
+    const colRef = collection(db, 'movies');
 
+    let recommend = [];
+    let newDisney = [];
+    let original = [];
+    let trending = [];
+
+    onSnapshot(colRef, (snapshot) => {
+      snapshot.docs.forEach((doc) => {
         switch (doc.data().type) {
           case 'recommend':
-            recommends = [...recommends, { id: doc.id, ...doc.data() }];
+            recommend = [...recommend, {id: doc.id, ...doc.data()}];
             break;
           case 'new':
-            newDisneys = [...newDisneys, { id: doc.id, ...doc.data() }];
+            newDisney = [...newDisney, {id: doc.id, ...doc.data()}];
             break;
           case 'original':
-            originals = [...originals, { id: doc.id, ...doc.data() }];
+            original = [...original, {id: doc.id, ...doc.data()}];
             break;
           case 'trending':
-            trendings = [...trendings, { id: doc.id, ...doc.data() }];
+            trending = [...trending, {id: doc.id, ...doc.data()}];
             break;
           default:
             break;
         }
       });
 
-      dispatch(setMovie({
-        recommend: recommends,
-        newDisney: newDisneys,
-        original: originals,
-        trending: trendings
+      dispatch(setMovies({
+        recommend: recommend,
+        newDisney: newDisney,
+        original: original,
+        trending: trending
       }));
     });
-
-  }, [userName]);
+  }, [dispatch, userName]);
 
   return (
     <Container>
-      <ImgSlider />
-      <Viewers />
-      <Recommends />
-      <NewDisney />
-      <Originals />
-      <Trending />
+      <ImgSlider/>
+      <Viewers/>
+      <Recommends/>
+      <NewDisney/>
+      <Originals/>
+      <Trending/>
     </Container>
   );
 };
